@@ -1,0 +1,14 @@
+def bon(n):
+    summ = 0
+    a = list(n)
+    for i in range(len(a)):
+        a[i] = int(a[i])
+        summ += a[i]
+    if int(n) % summ == 0:
+        return True
+    else:
+        return False
+
+
+print(bon('126'))
+print(bon('666'))
