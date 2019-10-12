@@ -1,0 +1,14 @@
+def fun(n):
+    arr = list(n)
+    counter = 0
+    for i in range(len(arr)):
+        arr[i] = int(arr[i])
+        if int(n)%arr[i]==0:
+            counter += 1
+
+    return 'True' if counter == len(arr) else 'False'
+
+
+print(fun('123'))
+print(fun('89'))
+print(fun('124'))
