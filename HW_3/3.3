@@ -1,0 +1,18 @@
+def row_generator(text):
+    length = len(list(text))
+    text.seek(0)
+    while True:
+        for i in range(length):
+            yield text.readline()
+        text.seek(0)
+
+
+if __name__ == '__main__':
+    file = 'test.txt'
+    with open(file) as text:
+        g = row_generator(text)
+        for i, l in enumerate(g):
+            if i > 20:
+                break
+            print(l)
+            
