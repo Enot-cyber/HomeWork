@@ -1,0 +1,20 @@
+def Morse(D):
+    morse_base = [
+    ".-","-...","-.-.","-..",".","..-.","--.","....","..",".---", 
+    "-.-",".-..","--","-.","---",".--.","--.-",".-.","...","-",
+    "..-","...-",".--","-..-","-.--","--.."
+    ]
+    d = 'abcdefghijklmnopqrstuvwxyz'
+    m_dict = dict(zip(d, morse_base))
+
+    morsewords = {}
+    for i in D:
+        morseword = ''
+        for l in i:
+            morseword += m_dict[l]
+        morsewords[i] = morseword
+        
+    return len(set(morsewords.values()))
+    
+if __name__ == "__main__":
+    print(Morse(["gin", "zen", "gig", "msg"]))
