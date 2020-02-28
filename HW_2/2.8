@@ -1,0 +1,15 @@
+def partition(S):
+    i, j = 0, 0
+    part_list = []
+    while i < len(S):
+        i = S.rfind(S[j]) + 1
+        if len(set(S[:i]) & set(S[i:])) == 0:
+            part_list.append(S[:i])
+            S = S[i:]
+            i, j = 0, 0
+        else:
+            j = j + 1
+    return part_list
+
+if __name__ == "__main__":
+   print(partition("qbqbcbqcqdufugduhxjhklxj"))
