@@ -1,0 +1,13 @@
+def is_valid(S):
+    x = 0
+    for i in range(len(S)):
+      if S[i] == '(':
+        x += 1
+      if S[i] == ')':
+        x -= 1
+      if x < 0:
+        return False
+      return True
+
+if __name__ == "__main__":
+  print(is_valid("(()())"))
