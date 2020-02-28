@@ -1,0 +1,25 @@
+def row(text):
+    length = len(list(text))
+    text.seek(0)
+    while True:
+        for i in range(length):
+            yield text.readline()
+        text.seek(0)
+
+def len_of_row(text):
+    length = len(list(text))
+    text.seek(0)
+    for n, i in enumerate(map(len, row(text))):
+        if length <= n:
+            break
+        yield i
+
+
+if __name__ == '__main__':
+    file = 'test.txt'
+    with open(file) as text:
+        g = len_of_row(text)
+        for i, l in enumerate(g):
+            if i > 20:
+                break
+            print(l)
