@@ -1,0 +1,14 @@
+def frequent(words, k):
+    unique = set(words)
+    c = {}
+
+    for word in unique:
+        c[words.count(word)] = c.get(words.count(word), [])
+        c[words.count(word)].append(word)
+
+    A = [c.get(x) for x in sorted(list(c.keys()), reverse = True)]
+
+    return A[:k]
+
+if __name__ == "__main__":
+    print(frequent(["hello", "world", "hello", "my", "dear", "world", "hello"],2))
