@@ -1,0 +1,20 @@
+def row(text):
+    length = len(list(text))
+    text.seek(0)
+    while True:
+        for i in range(length):
+            yield text.readline()
+        text.seek(0)
+
+def filt(text):
+      for item in filter(lambda x: 'NOD19' in x, row(text)):
+        yield item
+
+if __name__ == '__main__':
+    file = 'test.txt'
+    with open(file) as text:
+        g = filt(text)
+        for i, l in enumerate(g):
+            if i > 20:
+                break
+            print(l)
