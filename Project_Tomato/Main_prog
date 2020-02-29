@@ -1,0 +1,102 @@
+import threading, time #таймеры
+import telebot #pyTelegramBotAPI
+bot = telebot.TeleBot('889520535:AAGTBC1qgoB0Zss0MawsnNna9sHYtwHT1B4');
+ 
+@bot.message_handler(content_types=['text'])
+def get_text_messages(message):
+  global timerTomato, timerRest, tomato_time, rest_time, isTomatoActive, isRestActive
+  global previous_word #для того, чтобы запомнить и сравнить предыдущий ответ с новым.
+  global msg #для того, чтобы запомнить msg.chat.id
+  global work_title, t1, t2
+ 
+  if message.text == "/start":
+    previous_word = message.text
+    msg = bot.send_message(message.from_user.id, "Я Ваш персональный помидор. Создан, чтобы помочь Вам сконцентрироваться на выполнении поставленной задачи. Если нужна помощь, отправьте /help.\n\nНапишите какую задачу вы собираетесь выполнить?")    
+ 
+  elif message.text == "/help":
+    previous_word = message.text
+    msg = bot.send_message(message.from_user.id, "Метод помидора - это техника управления временем, которая предполагает разбиение задач на " +min_sec(0, tomato_time)+ " периоды, так называемые «помидоры», сопровождаемые короткими перерывами. Каждые " +min_sec(0, tomato_time)+ ", я буду напоминать о перерыве длиной в " +min_sec(0, rest_time)+ ", так вы сможете добиться максимальной эффективности работы.\n\nОтправьте /start, чтобы начать работу.\nОтправьте /run, чтобы запустить таймер.\nОтправьте /skip, чтобы пропустить таймер.\nОтправьте /stop, чтобы отключить таймер.")  
+ 
+  elif previous_word == "/start" and message.text != "/run" :
+    work_title = message.text
+    previous_word = message.text
+    msg = bot.send_message(message.from_user.id, "Отлично, я понял что вы собираетесь делать, когда вы будете готовы, отправьте /run, и я включу таймер на " +min_sec(0, tomato_time))      
+ 
+  elif message.text == "/run":
+    previous_word = message.text
+    msg = bot.send_message(message.from_user.id, "Я запустил таймер первого «помидора», напомню о себе через " +min_sec(0, tomato_time)+ " Желаю Вам эффективной работы! Если вы закончите работу раньше времени, отправьте /skip, и я пропущу текущий «помидор». Отправьте /stop, чтобы отключить бота.")
+    #Запустить первый таймер помидора
+    isTomatoActive = True; isRestActive = False
+    timerTomato = threading.Timer(tomato_time, tomato_start)
+    timerTomato.start()
+    t1 = time.time()
+ 
+  elif message.text == "/skip":
+    previous_word = message.text
+    if isTomatoActive == True and isRestActive == False:
+      timerTomato.cancel()
+      msg = bot.send_message(message.from_user.id, "Вы пропустили помидор раньше времени, начинаем перерыв на " +min_sec(0, rest_time)+ " Если вы закончите перерыв раньше времени, отправьте /skip, и я начну новый «помидор». Отправьте /stop, чтобы отключить бота.")
+      timerRest = threading.Timer(rest_time, rest_start)
+      timerRest.start()
+      isTomatoActive = False; isRestActive = True
+    elif isTomatoActive == False and isRestActive == True:
+      timerRest.cancel()
+      msg = bot.send_message(message.from_user.id, "Вы закончили перерыв раньше времени, надеюсь вы уже отдохнули, а я запускаю новый таймер на " +min_sec(0, tomato_time)+ ", желаю продуктивного времени! Если вы закончите работу раньше времени, отправьте /skip, и я пропущу текущий «помидор». Отправьте /stop, чтобы отключить бота.")
+      timerTomato = threading.Timer(tomato_time, tomato_start)
+      timerTomato.start()
+      isTomatoActive = True; isRestActive = False
+ 
+  elif message.text == "/stop":
+    if isTomatoActive == True or isRestActive == True:
+      if isTomatoActive: timerTomato.cancel()
+      if isRestActive: timerRest.cancel()
+      t2 = time.time()
+      if (len(work_title) == 0):
+        msg = bot.send_message(message.from_user.id, "Вы провели за работой " + min_sec(t1,t2) + " времени. Надеюсь, что ваша задача была успешна выполнена, увидимся позже! Чтобы запустить таймер снова, отправьте /start или /run.")
+      else:
+         msg = bot.send_message(message.from_user.id, "Вы провели за работой " + min_sec(t1,t2) + " времени. Надеюсь, что ваша задача «" + work_title + "» была успешна выполнена, увидимся позже! Чтобы запустить таймер снова, отправьте /start или /run.")
+      isTomatoActive = False; isRestActive = False
+     
+    else:
+      msg = bot.send_message(message.from_user.id, "Мы даже не запускали таймер.")
+ 
+  else:
+    msg = bot.send_message(message.from_user.id, "Я вас не понимаю. Напишите /help, чтобы узнать о существующих командах.")
+ 
+def tomato_start():
+  global msg, timerTomato, timerRest, isTomatoActive, isRestActive
+  bot.send_message(msg.chat.id, "Отлично, уже прошло " +min_sec(0, tomato_time)+ ". Теперь мы начинаем перерыв на " +min_sec(0, rest_time)+ ", отдыхайте. Если вы закончите перерыв раньше времени, отправьте /skip, и я начну новый «помидор». Отправьте /stop, чтобы отключить бота.")
+  timerTomato.cancel()
+  timerRest = threading.Timer(rest_time, rest_start)
+  timerRest.start()
+  isTomatoActive = False; isRestActive = True
+ 
+def rest_start():
+  global msg, timerTomato, timerRest, isTomatoActive, isRestActive
+  bot.send_message(msg.chat.id, "Отдохнули? Пора снова взяться за работу, я включаю новый таймер на " +min_sec(0, tomato_time)+ ", желаю продуктивного времени! Если вы закончите работу раньше времени, отправьте /skip, и я пропущу текущий «помидор». Отправьте /stop, чтобы отключить бота.")
+  timerRest.cancel()
+  timerTomato = threading.Timer(tomato_time, tomato_start)
+  timerTomato.start()
+  isTomatoActive = True; isRestActive = False
+ 
+def min_sec(x, y):
+  if (int(abs(y-x)/(60*60))) != 0 and (int(abs(y-x)%(60*60))) == 0:
+    return str(int(abs(y-x)/(60*60)))+" час."
+  elif (int(abs(y-x)/(60*60))) != 0:
+    return str(int(abs(y-x)/(60*60)))+" час., "+str(int((abs(y-x)%(60*60)/60)))+" мин., "+str(int((abs(y-x)%(60*60)%60))) + " сек."
+  elif (int(abs(y-x)/(60))) != 0 and (int(abs(y-x)%(60))) == 0:
+    return str(int(abs(y-x)/60))+" мин."
+  elif (int(abs(y-x)/(60))) != 0:
+    return str(int(abs(y-x)/60))+" мин., "+str(int(abs(y-x)%60))+" сек."
+  else:
+    return str(int(abs(y-x)))+" сек."
+ 
+t1 = None; t2 = None
+timerTomato = None; timerRest = None
+tomato_time = 5 #секунды, время работы помидора 25 мин = 25*60
+rest_time = 3 #секунды, время работы перерыва 5 мин - 5*60
+isTomatoActive = False; isRestActive = False
+previous_word = ''
+work_title = ''
+ 
+bot.polling(none_stop=True, interval=0) #для непрерывной работы pyTelegramBotAPI
